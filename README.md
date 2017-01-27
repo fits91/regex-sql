@@ -12,3 +12,5 @@ rest service which takes regex in [query string](https://en.wikipedia.org/wiki/Q
 * database dump and schema location: `src/main/resources/sql/`
 * configure database in file `src/main/resources/application.properties`
 * create jar with `mvn clean package`
+
+[![Build Status](https://travis-ci.org/fits91/regex-sql.svg?branch=master)](https://travis-ci.org/fits91/regex-sql)
