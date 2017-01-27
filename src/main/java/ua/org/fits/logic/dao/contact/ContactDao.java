@@ -6,5 +6,4 @@ import ua.org.fits.logic.dao.AbstractDao;
 
 @Repository
 public class ContactDao extends AbstractDao<Contact, String> {
-
 }

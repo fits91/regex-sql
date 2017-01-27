@@ -7,8 +7,9 @@ import ua.org.fits.logic.ReceiveEntities;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,38 +21,29 @@ public class ContactReceiver implements ReceiveEntities<Contact, String> {
     DataSource dataSource;
 
     public List<Contact> get(String val) throws SQLException {
+        List<Contact> contacts = new ArrayList<>();
+        Contact contact;
 
-    Connection conn = dataSource.getConnection();
-    PreparedStatement stmt = conn.prepareStatement("INSERT INTO contacts(id, name) VALUES (?, ?)");
+        Connection conn = dataSource.getConnection();
 
-        for(int i=0;i<1000000; i++) {
-            stmt.setInt(1, i);
-            stmt.setString(2, "name"+i);
-            stmt.addBatch();
+        Statement stmt = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
+        stmt.setFetchSize(100); // set batch size
+
+        ResultSet rs = stmt.executeQuery("SELECT * FROM contacts");
+
+        while (rs.next())
+        {
+            if(!rs.getString(2).matches(val)) {
+                contact = new Contact();
+                contact.setName(rs.getString(2));
+                contact.setId(rs.getInt(1));
+                contacts.add(contact);
+            }
         }
-        stmt.executeBatch();
+
+        rs.close();
         stmt.close();
         conn.close();
-//
-//    Statement stmt = conn.createStatement();
-//    ResultSet rs = stmt.executeQuery("SELECT * FROM contacts");
-//    while (rs.next())
-//    {
-//        System.out.print(rs.getInt(0));
-//        System.out.print(rs.getString(2));
-//    }
-//
-//    rs.close();
-//    stmt.close();
-//    conn.close();
-
-        List<Contact> contacts = new ArrayList<Contact>();
-//        for(int i=0;i<9000000;i++) {
-//            Contact contact = new Contact();
-//            contact.setId(i);
-//            contact.setName("name " + i);
-//            contacts.add(contact);
-//        }
 
         return Optional.ofNullable(contacts).orElse(new ArrayList<>());
     }

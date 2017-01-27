@@ -14,6 +14,9 @@ public abstract class AbstractManager<T,K> {
     AbstractDao dao;
 
     public List<T> get(K val) throws SQLException {
+        checkVal(val);
         return dao.get(val);
     }
+
+    public abstract void checkVal(K val);
 }
