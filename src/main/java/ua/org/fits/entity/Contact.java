@@ -21,6 +21,10 @@ public class Contact {
         this.name = name;
     }
 
+    public boolean ifNameMatchWithRegex(String regex) {
+        return this.name.matches(regex);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -12,7 +12,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class ContactReceiver implements ReceiveEntities<Contact, String> {
@@ -24,27 +23,33 @@ public class ContactReceiver implements ReceiveEntities<Contact, String> {
         List<Contact> contacts = new ArrayList<>();
         Contact contact;
 
-        Connection conn = dataSource.getConnection();
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
 
-        Statement stmt = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
-        stmt.setFetchSize(100); // set batch size
+        try {
+            conn = dataSource.getConnection();
 
-        ResultSet rs = stmt.executeQuery("SELECT * FROM contacts");
+            stmt = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
+            stmt.setFetchSize(100); // set batch size
 
-        while (rs.next())
-        {
-            if(!rs.getString(2).matches(val)) {
+            rs = stmt.executeQuery("SELECT * FROM contacts");
+
+            while (rs.next())
+            {
                 contact = new Contact();
                 contact.setName(rs.getString(2));
                 contact.setId(rs.getInt(1));
                 contacts.add(contact);
             }
+
+        } finally {
+            rs.close();
+            stmt.close();
+            conn.close();
         }
 
-        rs.close();
-        stmt.close();
-        conn.close();
 
-        return Optional.ofNullable(contacts).orElse(new ArrayList<>());
+        return contacts;
     }
 }
